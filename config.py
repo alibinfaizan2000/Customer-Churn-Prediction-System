@@ -10,6 +10,9 @@ cloud secret managers. We keep it simple here but structured correctly.
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # ─── Project root ────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent
 
