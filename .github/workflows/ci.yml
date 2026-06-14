@@ -26,7 +26,10 @@ jobs:
           key: pip-${{ hashFiles('requirements.txt') }}
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install pytest
+          pip install -r requirements.txt
 
       - name: Run test suite
         run: PYTHONPATH=. pytest tests/ -v --tb=short
