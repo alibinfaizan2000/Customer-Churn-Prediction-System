@@ -1,0 +1,30 @@
+services:
+      - type: web
+        name: churn-api
+        runtime: python
+        buildCommand: "pip install -r render-requirements.txt && python app/training/train.py"
+        startCommand: "uvicorn app.api.main:app --host 0.0.0.0 --port $PORT"
+        envVars:
+          - key: PYTHONPATH
+            value: .
+          - key: ADMIN_API_KEY
+            sync: false          # means: set this manually in Render dashboard
+          - key: SERVICE_API_KEY
+            sync: false
+          - key: READONLY_API_KEY
+            sync: false
+          - key: UI_API_KEY
+            sync: false
+
+      - type: web
+        name: churn-ui
+        runtime: python
+        buildCommand: "pip install streamlit plotly requests"
+        startCommand: "streamlit run app/ui/streamlit_app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true"
+        envVars:
+          - key: PYTHONPATH
+            value: .
+          - key: API_BASE_URL
+            sync: false          # set this to your churn-api URL after deploying API
+          - key: UI_API_KEY
+            sync: false

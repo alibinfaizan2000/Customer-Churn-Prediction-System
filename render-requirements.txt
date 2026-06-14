@@ -1,0 +1,28 @@
+# requirements.txt — All project dependencies
+#
+# DEPENDENCY STRATEGY:
+# We pin major.minor versions but allow patch updates (e.g., 1.3.*)
+# This balances stability (no breaking changes) with security patches.
+# In production, consider tools like pip-tools or Poetry for exact lockfiles.
+
+# ── Core ML / Data ────────────────────────────────────────────────────────────
+pandas>=2.0.0,<3.0.0
+numpy>=1.24.0,<2.0.0
+scikit-learn>=1.3.0,<2.0.0
+xgboost>=1.7.0,<3.0.0
+
+# ── Model persistence ─────────────────────────────────────────────────────────
+joblib>=1.3.0
+
+# ── FastAPI + server ──────────────────────────────────────────────────────────
+fastapi>=0.104.0,<1.0.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0,<3.0.0
+
+# ── Streamlit UI ──────────────────────────────────────────────────────────────
+streamlit>=1.28.0
+plotly>=5.18.0
+requests>=2.31.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0    # .env file support
