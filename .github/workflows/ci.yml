@@ -31,6 +31,14 @@ jobs:
           pip install pytest
           pip install -r requirements.txt
 
+      - name: Train model
+        run: PYTHONPATH=. python app/training/train.py
+        env:
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+          SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
+          READONLY_API_KEY: ${{ secrets.READONLY_API_KEY }}
+          UI_API_KEY: ${{ secrets.UI_API_KEY }}
+
       - name: Run test suite
         run: PYTHONPATH=. pytest tests/ -v --tb=short
         env:
