@@ -1,37 +1,37 @@
-name: CI — Test Suite
+name: CI Test Suite
 
-    on:
-      push:
-        branches: [main, develop]
-      pull_request:
-        branches: [main]
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
 
-    jobs:
-      test:
-        runs-on: ubuntu-latest
+jobs:
+  test:
+    runs-on: ubuntu-latest
 
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-          - name: Set up Python 3.11
-            uses: actions/setup-python@v5
-            with:
-              python-version: "3.11"
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-          - name: Cache pip packages
-            uses: actions/cache@v4
-            with:
-              path: ~/.cache/pip
-              key: pip-${{ hashFiles('requirements.txt') }}
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('requirements.txt') }}
 
-          - name: Install dependencies
-            run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-          - name: Run test suite
-            run: PYTHONPATH=. pytest tests/ -v --tb=short
-            env:
-              ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
-              SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
-              READONLY_API_KEY: ${{ secrets.READONLY_API_KEY }}
-              UI_API_KEY: ${{ secrets.UI_API_KEY }}
+      - name: Run test suite
+        run: PYTHONPATH=. pytest tests/ -v --tb=short
+        env:
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+          SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
+          READONLY_API_KEY: ${{ secrets.READONLY_API_KEY }}
+          UI_API_KEY: ${{ secrets.UI_API_KEY }}
