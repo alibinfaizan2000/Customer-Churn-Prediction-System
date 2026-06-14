@@ -1,0 +1,53 @@
+# Dockerfile for FastAPI backend
+#
+# WHY MULTI-STAGE BUILD (simplified here for clarity):
+# We use a single stage for simplicity, but in production you'd use
+# multi-stage builds to keep the final image small.
+#
+# WHY python:3.11-slim:
+# - slim = smaller image (no dev tools, no test suites)
+# - 3.11 = stable, widely supported, ~25% faster than 3.9
+#
+# IMAGE SIZE REDUCTION TIPS (interview talking point):
+# - Use slim/alpine base images
+# - Don't install dev dependencies in production
+# - Clear pip cache with --no-cache-dir
+# - Combine RUN commands to reduce layers
+
+FROM python:3.11-slim
+
+# Set working directory inside container
+WORKDIR /app
+
+# Install system dependencies needed for some Python packages
+# (XGBoost, SHAP may need libgomp for OpenMP parallelism)
+RUN apt-get update && apt-get install -y \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# WHY COPY requirements first:
+# Docker caches layers. If we copy requirements before source code,
+# and source code changes, only the code layer is rebuilt — not the
+# entire pip install (which takes minutes). This is a key Docker optimization.
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY config.py .
+COPY app/ ./app/
+
+# Create directories that will be mounted or created at runtime
+RUN mkdir -p app/data app/models
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Health check: Docker pings /health every 30s
+# If it fails 3 times, container is marked unhealthy
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+
+# Run the FastAPI app with uvicorn
+# --host 0.0.0.0: listen on all interfaces (not just localhost)
+# --workers 1: single worker for simplicity; use 2-4 in production
+CMD ["uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

@@ -1,0 +1,7 @@
+venv/
+.env
+app/models/*.pkl
+app/data/*.csv
+predictions_log.jsonl
+mlruns/
+mlflow.db

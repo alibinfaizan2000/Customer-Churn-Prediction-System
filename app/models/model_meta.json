@@ -1,0 +1,49 @@
+{
+  "feature_names": [
+    "gender",
+    "SeniorCitizen",
+    "Partner",
+    "Dependents",
+    "tenure",
+    "PhoneService",
+    "MultipleLines",
+    "OnlineSecurity",
+    "OnlineBackup",
+    "DeviceProtection",
+    "TechSupport",
+    "StreamingTV",
+    "StreamingMovies",
+    "PaperlessBilling",
+    "MonthlyCharges",
+    "TotalCharges",
+    "avg_monthly_spend",
+    "charge_increase",
+    "charge_ratio",
+    "service_count",
+    "contract_risk",
+    "paperless_no_support"
+  ],
+  "model_name": "XGBoost",
+  "test_metrics": {
+    "model": "XGBoost",
+    "accuracy": 0.7573,
+    "precision": 0.5301,
+    "recall": 0.754,
+    "f1": 0.6225,
+    "roc_auc": 0.8404
+  },
+  "cv_roc_auc": {
+    "Logistic Regression": {
+      "mean": 0.8471514189826103,
+      "std": 0.013135873529936145
+    },
+    "Random Forest": {
+      "mean": 0.8235736867020824,
+      "std": 0.010827286336264065
+    },
+    "XGBoost": {
+      "mean": 0.8369635461879046,
+      "std": 0.013802136079257918
+    }
+  }
+}

@@ -1,0 +1,105 @@
+# docker-compose.yml — Orchestrates the full Churn Prediction system
+#
+# WHY DOCKER COMPOSE:
+# Running multiple containers manually with docker run is tedious and error-prone.
+# Compose defines the entire multi-container system in one file:
+# - Service dependencies (UI waits for API to be healthy)
+# - Shared networks (UI can reach API by hostname)
+# - Volume mounts (model files persist between restarts)
+# - Environment variables
+#
+# USAGE:
+#   docker-compose up --build          # Build images and start
+#   docker-compose up -d               # Run in background
+#   docker-compose logs -f api         # Follow API logs
+#   docker-compose down                # Stop and remove containers
+#   docker-compose down -v             # Also remove volumes
+#
+# INTERVIEW TIP: In production, this would be replaced with Kubernetes manifests
+# or a managed service like AWS ECS, Google Cloud Run, or Azure Container Apps.
+
+version: "3.9"
+
+services:
+
+  # ── Training service ───────────────────────────────────────────────────────
+  # Runs once to train the model, then exits.
+  # The trained model is saved to the shared 'models' volume.
+  train:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: churn_train
+    volumes:
+      - model_data:/app/app/models
+      - raw_data:/app/app/data
+    env_file:
+      - ../.env
+    environment:
+      - PYTHONPATH=/app
+    command: python app/training/train.py
+    # This service exits after training completes
+    restart: "no"
+
+  # ── FastAPI backend ────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: churn_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - model_data:/app/app/models     # Read trained model
+      - raw_data:/app/app/data         # Access data if needed
+      - logs:/app/logs                 # Prediction logs
+    env_file:
+      - ../.env
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      train:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # ── Streamlit frontend ────────────────────────────────────────────────────
+  ui:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ui
+    container_name: churn_ui
+    ports:
+      - "8501:8501"
+    env_file:
+      - ../.env
+    environment:
+      - API_BASE_URL=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy       # Wait until API passes health check
+    restart: unless-stopped
+
+# ── Volumes ─────────────────────────────────────────────────────────────────
+# Named volumes persist data between container restarts.
+# WHY NAMED VOLUMES over bind mounts:
+# - Portable: works on any OS without path translation
+# - Docker manages them: easier to backup/restore
+# - Better performance on macOS/Windows Docker
+volumes:
+  model_data:
+    driver: local
+  raw_data:
+    driver: local
+  logs:
+    driver: local
+
+# ── Network ──────────────────────────────────────────────────────────────────
+# All services are on the same default network.
+# The UI can reach the API at http://api:8000 (service name = DNS hostname).
+# External traffic hits port 8501 (UI) or 8000 (API directly).

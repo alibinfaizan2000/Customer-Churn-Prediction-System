@@ -1,0 +1,42 @@
+# Dockerfile for Streamlit frontend
+#
+# This image is simpler than the API image — just Python + Streamlit.
+# The UI calls the API backend via HTTP; it doesn't load the ML model itself.
+# This separation means:
+# - UI can be restarted without affecting predictions
+# - UI and API scale independently
+# - Multiple UIs can point to one API
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install only UI dependencies (lighter than the full ML stack)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY config.py .
+COPY app/ui/ ./app/ui/
+
+# Streamlit config: disable analytics, set port
+# Using a config file to avoid command-line flag clutter
+RUN mkdir -p /root/.streamlit
+RUN echo "\
+[general]\n\
+email = ''\n\
+[server]\n\
+headless = true\n\
+enableCORS = false\n\
+enableXsrfProtection = false\n\
+port = 8501\n\
+" > /root/.streamlit/config.toml
+
+EXPOSE 8501
+
+# Streamlit doesn't have a built-in health check endpoint
+# but we can check if the port is open
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8501')" || exit 1
+
+CMD ["streamlit", "run", "app/ui/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
