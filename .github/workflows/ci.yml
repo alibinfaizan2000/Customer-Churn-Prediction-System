@@ -31,7 +31,7 @@ name: CI — Test Suite
           - name: Run test suite
             run: PYTHONPATH=. pytest tests/ -v --tb=short
             env:
-              ADMIN_API_KEY: test-admin-key
-              SERVICE_API_KEY: test-service-key
-              READONLY_API_KEY: test-readonly-key
-              UI_API_KEY: test-service-key
+              ADMIN_API_KEY   = churn-admin-9b0935a288cf14c8e9aac89d800b8fb1
+              SERVICE_API_KEY = churn-svc-45ed96991e58726d29e74d73696f78ca
+              READONLY_API_KEY= churn-ro-9b709f83fa1368111f4a17c9e43d30db
+              UI_API_KEY=churn-svc-45ed96991e58726d29e74d73696f78ca
