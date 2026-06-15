@@ -182,11 +182,19 @@ def render_sidebar():
             st.info("Start the backend:\n```\npython app/api/main.py\n```")
 
         st.divider()
-        page = st.radio(
+
+        '''page = st.radio(
             "Navigation",
             ["🔮 Single Prediction", "📊 Model Performance", "📈 Monitoring"],
             label_visibility="collapsed"
+        )'''
+
+        page = st.radio(
+            "Navigation",
+            ["🔮 Single Prediction", "📊 Model Performance"],
+            label_visibility="collapsed"
         )
+
         st.divider()
         st.caption("Built with FastAPI + XGBoost + SHAP + Streamlit")
         return page
