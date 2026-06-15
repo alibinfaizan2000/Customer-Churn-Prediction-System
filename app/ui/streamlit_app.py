@@ -183,11 +183,6 @@ def render_sidebar():
 
         st.divider()
 
-        '''page = st.radio(
-            "Navigation",
-            ["🔮 Single Prediction", "📊 Model Performance", "📈 Monitoring"],
-            label_visibility="collapsed"
-        )'''
 
         page = st.radio(
             "Navigation",
